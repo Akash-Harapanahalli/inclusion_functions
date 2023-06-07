@@ -1,0 +1,11 @@
+[tool.setuptools]
+packages = ["inclusion_functions"]
+
+[project]
+name = "inclusion_functions"
+version = "0.0.1"
+dependencies = [
+    "numpy",
+    "sympy",
+    "interval"
+]
