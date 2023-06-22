@@ -4,7 +4,7 @@ from interval import from_cent_pert, get_lu, get_iarray
 import sympy as sp
 from ReachMM import NeuralNetwork
 from centered import CenteredInclusionFunction
-from cornered import CorneredInclusionFunction, all_corners
+from cornered import CorneredInclusionFunction, two_corners, all_corners
 import torch
 from auto_LiRPA import BoundedModule, BoundedTensor, PerturbationLpNorm
 
@@ -19,7 +19,7 @@ W3 = net.seq[4].weight.cpu().detach().numpy()
 b3 = net.seq[4].bias.cpu().detach().numpy().reshape(-1,1)
 
 cent = np.array([8,7,-2*np.pi/3,2])
-pert = np.array([0.1,0.1,0.1,0.1])
+pert = np.array([0.001,0.001,0.001,0.001])
 x0 = from_cent_pert(cent, pert)
 _x, x_ = get_lu(x0)
 
@@ -61,15 +61,31 @@ print(f_nat(x0.reshape(-1,1)).reshape(-1))
 # f_eqn = W3@sig(W1@sp.Matrix(xvars) + b1) + b3
 f_eqn = sig(W1@sp.Matrix(xvars) + b1)
 
-f_cent = CenteredInclusionFunction(f_eqn, xvars)
+# # f_cent = CenteredInclusionFunction(f_eqn, xvars)
 # f_cent = CorneredInclusionFunction(f_eqn, xvars, all_corners(4))
-f_cent.f = lambda x : W2@np.tanh((W1@x).reshape(-1,1) + b1) + b2
-f2 = lambda x : W3@np.tanh(x) + b3
-f_cent.Df_x = lambda x : W2@((1 - np.tanh(W1@x + b1)) @ (1 - np.tanh(W1@x + b1)).T)@W1
-print((1 - np.tanh(W1@x0 + b1)).shape)
+# f_cent.f = lambda x : W3@np.tanh((W1@x).reshape(-1,1) + b1) + b3
+# # f2 = lambda x : W3@np.tanh(x) + b3
+# print(W3.shape)
+# print(W1.shape)
+# f_cent.Df_x = lambda x : W3@(np.diag((1 - np.tanh(W1@x.reshape(-1,1) + b1)**2).reshape(-1)))@W1
+
+# print('Cornered: ')
+# print(f_cent(x0).reshape(-1))
+
+# f_cent0 = lambda x: (W1@x.reshape(-1,1)) + b1
+
+f_cent = CorneredInclusionFunction(f_eqn, xvars, two_corners(4))
+# f_cent = CorneredInclusionFunction(f_eqn, xvars, all_corners(4))
+f_cent.f = lambda y : W2@np.tanh((W1@y.reshape(-1,1) + b1).reshape(-1,1)) + b2
+f_cent.Df_x = lambda y : W2@(np.diag((1 - np.tanh(W1@y.reshape(-1,1) + b1)**2).reshape(-1)))@W1
+
+f_cent2 = CorneredInclusionFunction(f_eqn, xvars, two_corners(100))
+f_cent2.f = lambda z : W3@np.tanh(z.reshape(-1,1)) + b3
+f_cent2.Df_x = lambda z : W3@(np.diag((1 - np.tanh(z)**2).reshape(-1)))
 
 print('Centered: ')
-print(f2(f_cent(x0).reshape(-1,1)))
+print(f_cent2(f_cent(x0.reshape(-1)).reshape(-1)).reshape(-1))
+# print(f_cent2(f_cent(f_cent0(x0).reshape(-1)).reshape(-1)).reshape(-1))
 
 # f_corn = CorneredInclusionFunction(f_eqn, xvars, all_corners(4))
 # print('Cornered: ')
