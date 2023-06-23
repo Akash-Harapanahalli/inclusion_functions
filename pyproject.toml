@@ -1,5 +1,5 @@
 [tool.setuptools]
-packages = ["inclusion_functions"]
+packages = ["inclusion"]
 
 [project]
 name = "inclusion_functions"

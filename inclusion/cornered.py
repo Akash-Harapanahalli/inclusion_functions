@@ -3,7 +3,7 @@ import interval
 from interval import get_lu, as_lu, get_iarray
 import sympy as sp
 from inclusion import InclusionFunction, standard_ordering
-from utils import d_positive
+from .utils import d_positive
 
 class Corner :
     def __init__(self, edge) -> None:

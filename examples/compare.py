@@ -2,8 +2,8 @@ import sympy as sp
 import numpy as np
 import interval
 # from cornered import MixedCorneredInclusionFunction, CorneredInclusionFunction, all_corners, two_corners
-from cornered import *
-from centered import *
+# from cornered import *
+# from centered import *
 from inclusion import *
 from ReachMM.utils import run_times
 
