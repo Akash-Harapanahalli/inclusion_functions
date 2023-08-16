@@ -8,18 +8,12 @@ from inclusion import InclusionFunction, standard_ordering
 class CenteredInclusionFunction (InclusionFunction) :
     def __init__(self, f_eqn, x_vars) -> None:
         super().__init__(f_eqn, x_vars)
-        # self.f = None
-        # self.Df_x = None
         self.f_lam = sp.lambdify((x_vars,), f_eqn, 'numpy')
-        self.f = lambda x : self.f_lam(x)[0]
-        # self.f = sp.lambdify((x_vars,), f_eqn, 'numpy')
+        self.f = lambda x : np.array(self.f_lam(x))
         self.Df_x_sym = self.f_eqn.jacobian((x_vars,))
         self.Df_x = sp.lambdify((x_vars,), self.Df_x_sym)
     
     def __call__(self, x) :
-        # if x.dtype != np.interval :
-        #     raise NotIntervalException(x)
-
         cent, _ = get_cent_pert(x)
         return self.f(cent).reshape(-1) + self.Df_x(x)@(x - cent)
 
@@ -34,21 +28,11 @@ class MixedCenteredInclusionFunction (InclusionFunction) :
         self.f_i = [sp.lambdify((x_vars,), f_eqn_i, 'numpy') for f_eqn_i in self.f_eqn]
         self.Df_x_sym = self.f_eqn.jacobian((x_vars,))
         self.Df_x = sp.lambdify((x_vars,), self.Df_x_sym)
-        # # print([self.Df_x_sym[:,i] for i in range(self.n)])
         self.Df_x_i = [sp.lambdify((x_vars,), self.Df_x_sym[:,i]) for i in range(self.n)]
-        # self.f = None
-        # self.Df_x = None
 
         self.orderings = orderings if orderings is not None else standard_ordering(self.n)
     
     def __call__(self, x) :
-        # if x.dtype != np.interval :
-        #     raise NotIntervalException(x)
-
-        # J_i = [lambda x : get_lu(Df_x_col(x)) for Df_x_col in self.Df_x_i]
-
-        # return _mixed_cornered_algorithm(self.orderings, self.corners, self.Df_x_i, self.f, x, self.m, self.n)
-
         ret = []
         cent, _ = get_cent_pert(x)
 

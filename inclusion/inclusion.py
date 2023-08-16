@@ -19,7 +19,7 @@ class NaturalInclusionFunction (InclusionFunction) :
     def __call__(self, x) :
         # if x.dtype != np.interval :
         #     raise NotIntervalException(x)
-        return self.f(x)
+        return np.array(self.f(x)).reshape(-1)
 
 class Ordering :
     def __init__(self, ordering) -> None:
